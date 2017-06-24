@@ -1,0 +1,14 @@
+{
+    "name": "tiny/dbunit",
+    "description": "Helper package for database testing",
+    "authors": [
+        {
+            "name": "Mike Shmatov",
+            "email": "shmatov@inbox.ru"
+        }
+    ],
+    "autoload": {
+        "psr-4": {"Tiny\\DbUnit\\": "src/"}
+    },
+    "require": {}
+}

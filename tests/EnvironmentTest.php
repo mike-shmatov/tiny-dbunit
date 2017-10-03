@@ -32,4 +32,10 @@ class EnvironmentTest extends PHPUnit_Extensions_Database_TestCase
     public function testTableFilled(){
         $this->assertTableRowCount('t1', 1);
     }
+    
+    public function testNewConnection(){
+        $newPdo = new \PDO('sqlite::memory');
+        $result = $newPdo->query("SELECT name FROM sqlite_master WHERE type='table';", \PDO::FETCH_ASSOC);
+        $this->assertCount(0, $result->fetchAll());
+    }
 }

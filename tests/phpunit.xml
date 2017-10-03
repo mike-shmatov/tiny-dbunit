@@ -1,2 +1,12 @@
 <?xml version="1.0"?>
-<phpunit bootstrap="bootstrap.php" colors="false" />
+<phpunit bootstrap="bootstrap.php" colors="false" suffix="TestCase.php">
+    <testsuites suffix="TestCase.php">
+        <testsuite name="Usage test cases">
+            <directory >./AbstractDbunitTestCaseTests</directory>
+        </testsuite>
+        <testsuite name="Unit tests">
+            <directory >./</directory>
+            <exclude>./AbstractDbunitTestCaseTests/</exclude>
+        </testsuite>
+    </testsuites>
+</phpunit>

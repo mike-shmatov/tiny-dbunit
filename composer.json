@@ -10,5 +10,13 @@
     "autoload": {
         "psr-4": {"Tiny\\DbUnit\\": "src/"}
     },
-    "require": {}
+    "repositories": [
+        {
+            "type": "path",
+            "url": "..//sql"
+        }
+    ],
+    "require": {
+        "tiny/sql": "dev-master"
+    }
 }

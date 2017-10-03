@@ -28,5 +28,4 @@ class SqliteInMemoryDbConnector implements Interfaces\DbConnector
     public function getPDO() {
         return $this->pdo;
     }
-
 }

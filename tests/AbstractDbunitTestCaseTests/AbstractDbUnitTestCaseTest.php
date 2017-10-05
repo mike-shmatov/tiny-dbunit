@@ -29,7 +29,7 @@ class AbstractDbUnitTestCaseTest extends \Tiny\DbUnit\AbstractDbUnitTestCase
         $this->assertInstanceOf(\PHPUnit_Extensions_Database_DB_IDatabaseConnection::class, $this->getConnection());
     }
     
-//    public function testConnectionIsCached(){
-//        $this->assertSame($this->getConnection(), $this->getConnection());
-//    }
+    public function testConnectionIsNotCached(){
+        $this->assertNotSame($this->getConnection(), $this->getConnection());
+    }
 }

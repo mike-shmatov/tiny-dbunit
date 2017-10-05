@@ -7,10 +7,21 @@ class SqlBatchRunnerTest extends PHPUnit_Framework_TestCase
     
     public function setUp(){
         $this->pdoMock = $this->createMock(\PDO::class);
-        $this->strategyMock = $this->getMockBuilder('Tiny\\Sql\\Interfaces\\ExceptionsHandlingStrategy')
-                         ->setMethods(['handle'])
-                         ->getMock();
-        $this->batchRunner = new Tiny\DbUnit\SqlBatchRunner($this->pdoMock, $this->strategyMock);
+        $this->batchRunner = $this->getMockBuilder(Tiny\DbUnit\SqlBatchRunner::class)
+                                  ->setConstructorArgs([$this->pdoMock])
+                                  ->getMockForAbstractClass();
+    }
+    
+    public function testCreatingWithoutPdo(){
+        $caught = NULL;
+        try{
+            $batchRunner = $this->batchRunner = $this->getMockBuilder(Tiny\DbUnit\SqlBatchRunner::class)
+                                  ->setConstructorArgs([])
+                                  ->getMockForAbstractClass();
+        } catch (\Exception $ex) {
+            $caught = $ex;
+        }
+        $this->assertNull($caught);
     }
     
     public function testCreating(){
@@ -21,16 +32,6 @@ class SqlBatchRunnerTest extends PHPUnit_Framework_TestCase
             ->method('query')
             ->withConsecutive(['first statement'], ['second statement']);
         $this->batchRunner->query($fakeStatements);
-    }
-    
-    public function testExceptionsHandlingStrategy(){
-        $exceptionMock = new \Exception('Mock exception');
-        $this->pdoMock->method('query')
-                      ->will($this->throwException($exceptionMock));
-        $this->strategyMock->expects($this->once())
-                           ->method('handle')
-                           ->with($exceptionMock, 0);
-        $this->batchRunner->query(['some bad statement']);
     }
     
     /**

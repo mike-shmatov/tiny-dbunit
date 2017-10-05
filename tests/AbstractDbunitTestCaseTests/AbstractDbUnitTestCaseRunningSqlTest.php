@@ -4,8 +4,6 @@
  */
 class AbstractDbUnitTestCaseRunningSqlTest extends \Tiny\DbUnit\AbstractDbUnitTestCase
 {
-    private static $pdoCache;
-    
     /**
      * That is how real setUp should look like.
      * Preparing a connection should go first so parent setUp can be run with connection
@@ -18,11 +16,11 @@ class AbstractDbUnitTestCaseRunningSqlTest extends \Tiny\DbUnit\AbstractDbUnitTe
         $this->initializeSql('CREATE TABLE tbl (id INTEGER PRIMARY KEY AUTOINCREMENT);CREATE TABLE tbl2 (value TEXT);');
         $this->runSql('INSERT INTO tbl2 (value) VALUES ("one");');
         parent::setUp();
-        self::$pdoCache = $this->pdo;
     }
     
     public function tearDown(){
-        $this->deinitializeSql('DELETE * FROM tbl2;');
+        $this->deinitializeSql('DELETE FROM tbl2;');
+        parent::tearDown();
     }
     
     /**
@@ -53,12 +51,11 @@ class AbstractDbUnitTestCaseRunningSqlTest extends \Tiny\DbUnit\AbstractDbUnitTe
         $this->assertCount(4, $rows); // note 4 lines since setUpSql was run 4 times including this test
     }
     
-//    public static function tearDownAfterClass() {
-//        $data = self::$pdoCache->query('SELECT * FROM tbl2;', \PDO::FETCH_ASSOC)->fetchAll();
-//        self::assertCount(4, $data);
-//        parent::tearDownAfterClass(); // explicit call for deinitialization
-//        $data = self::$pdoCache->query('SELECT * FROM tbl2;', \PDO::FETCH_ASSOC)->fetchAll();
-//        self::assertCount(0, $data);
-//        self::markTestSkipped('todo deinit');
-//    }
+    public function testtearDownAfterClass() {
+        $data = $this->pdo->query('SELECT * FROM tbl2;', \PDO::FETCH_ASSOC)->fetchAll();
+        $this->assertCount(5, $data);
+        parent::tearDownAfterClass(); // explicit call for deinitialization
+        $data = $this->pdo->query('SELECT * FROM tbl2;', \PDO::FETCH_ASSOC)->fetchAll();
+        $this->assertCount(0, $data);
+    }
 }

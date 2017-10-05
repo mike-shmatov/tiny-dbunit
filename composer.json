@@ -18,5 +18,8 @@
     ],
     "require": {
         "tiny/sql": "dev-master"
+    },
+    "require-dev": {
+        "mikey179/vfsStream": "1.*"
     }
 }

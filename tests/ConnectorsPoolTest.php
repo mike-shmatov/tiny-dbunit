@@ -24,4 +24,30 @@ class ConnectorsPoolTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($connectorStub, $this->pool->getInMemoryConnector());
         $this->assertSame($connectorStub, $this->pool->getInMemoryConnector());
     }
+    
+    public function testPlacingConnectorUnderId(){
+        $connectorStub = new stdClass();
+        $this->factoryMock->expects($this->exactly(2))
+                    ->method('makeInMemoryConnector')
+                    ->willReturnOnConsecutiveCalls($connectorStub, 'global scope connection');
+        $this->assertSame($connectorStub, $this->pool->getInMemoryConnector('id'));
+        $this->assertSame($connectorStub, $this->pool->getInMemoryConnector('id'));
+        $this->assertSame('global scope connection', $this->pool->getInMemoryConnector());
+    }
+    
+    public function testExplicitStoring(){
+        $connectorStub = new stdClass();
+        $this->pool->store('id', $connectorStub);
+        $this->assertSame($connectorStub, $this->pool->getInMemoryConnector('id'));
+        
+    }
+    
+    public function testForceNewConnection(){
+        $this->factoryMock->expects($this->exactly(3))
+                          ->method('makeInMemoryConnector')
+                          ->willReturnOnConsecutiveCalls('connector', 'new connector', 'yet another new');
+        $this->assertSame('connector', $this->pool->getInMemoryConnector());
+        $this->assertSame('new connector', $this->pool->getInMemoryConnector(true));
+        $this->assertSame('yet another new', $this->pool->getInMemoryConnector(true));
+    }
 }

@@ -1,14 +1,12 @@
 <?php
 namespace Tiny\DbUnit;
 
-class SqlBatchRunner
+abstract class SqlBatchRunner
 {
     private $pdo;
-    private $exceptionHandler;
     
-    public function __construct($pdo, $exceptionHandler){
+    public function __construct($pdo = NULL){
         $this->pdo = $pdo;
-        $this->exceptionHandler = $exceptionHandler;
     }
     
     public function setPdo($pdo){
@@ -26,7 +24,9 @@ class SqlBatchRunner
                 $this->pdo->query($statement);
             }
             catch (\Exception $ex) {
-                $this->exceptionHandler->handle($ex, $num);
+                static::handle($ex, $num);
             }
         }
+        
+    abstract protected function handle(\Exception $ex, $num);
 }

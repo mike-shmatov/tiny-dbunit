@@ -10,7 +10,7 @@ class AbstractDbUnitTestCaseTest extends \Tiny\DbUnit\AbstractDbUnitTestCase
      * otherwise it will fail.
      */
     public function setUp(){
-        $this->makeInMemoryConnector();
+        $this->useInMemoryConnector();
         parent::setUp();
     }
     

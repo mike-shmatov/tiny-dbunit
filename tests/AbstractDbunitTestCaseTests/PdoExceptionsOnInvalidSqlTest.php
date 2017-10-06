@@ -2,7 +2,7 @@
 /**
  * Self-testing approach: current TestCase extends the TestCase being tested.
  */
-class TestCaseRunningBadSqlTest extends \Tiny\DbUnit\AbstractDbUnitTestCase
+class PdoExceptionsOnInvalidSqlTest extends \Tiny\DbUnit\AbstractDbUnitTestCase
 {
     private $expectedException;
     

@@ -10,8 +10,19 @@ abstract class AbstractDbUnitTestCase extends \PHPUnit_Extensions_Database_TestC
     protected static $afterClassSql;
     private static $pdoCache;
     private static $testCaseConnectionEnabled = false;
-    private $temporaryNewConnector;
+    private $testCaseScopeConnector;
     private static $beforeClassSql;
+    
+    public function __construct($name = null, array $data = array(), $dataName = '', $child = NULL) {
+        parent::__construct($name, $data, $dataName);
+        self::$connectorsPool = ConnectorsPoolSingletonDecorator::getInstance();
+        self::$sqlRunner = SqlRunnerSingletonDecorator::getInstance();
+    }
+    
+    public static function setUpBeforeClass() {
+        self::$objId = NULL;
+        parent::setUpBeforeClass();
+    }
     
     protected static function createTestCaseConnection(){
         self::$testCaseConnectionEnabled = true;
@@ -20,45 +31,25 @@ abstract class AbstractDbUnitTestCase extends \PHPUnit_Extensions_Database_TestC
     protected static function beforeClassSql($sql){
         self::$beforeClassSql = $sql;
     }
-
-
-    public function __construct($name = null, array $data = array(), $dataName = '', $child = NULL) {
-//        print "hash is ".spl_object_hash($this)."\n";
-//        if($child){
-//            print "child's ".spl_object_hash($child)."\n";
-//        }
-        parent::__construct($name, $data, $dataName);
-        self::$connectorsPool = ConnectorsPoolSingletonDecorator::getInstance();
-        self::$sqlRunner = SqlRunnerSingletonDecorator::getInstance();
-    }
     
     public function setUp(){
         $this->createTestCaseId();
-        if($this->temporaryNewConnector){
-            self::$connectorsPool->store(self::$objId, $this->temporaryNewConnector);
+        if($this->testCaseScopeConnector){
+            $this->storeTestCaseScopeConnectorInPool();
         }
         self::$pdoCache = $this->pdo;
-        if(self::$beforeClassSql){
-            self::$sqlRunner->run($this->pdo, self::$beforeClassSql);
-            self::$beforeClassSql = false;
-        }
         parent::setUp();
-    }
-    
-    public static function setUpBeforeClass() {
-        self::$objId = NULL;
-        parent::setUpBeforeClass();
-    }
-
-    protected function setTestCaseScope(){
-        $this->createTestCaseId();
     }
     
         private function createTestCaseId(){
             if(is_null(self::$objId)){
                 self::$objId = spl_object_hash($this);
             }
-//            print "assigned ".self::$objId."\n";
+        }
+    
+        private function storeTestCaseScopeConnectorInPool(){
+            self::$connectorsPool->store(self::$objId, $this->testCaseScopeConnector);
+            $this->testCaseScopeConnector = NULL;
         }
 
     protected function getConnection() {
@@ -67,41 +58,41 @@ abstract class AbstractDbUnitTestCase extends \PHPUnit_Extensions_Database_TestC
     }
     
     protected function useInMemoryConnector(){
-        if(self::$testCaseConnectionEnabled){
-            $connector = $this->createNewInMemoryConnector();
-        }
-        else{
-            $connector = $this->getConnectionFromPool();
-        }
-        $pdo = $connector->getPDO();
-        $this->fillPdo($pdo);
+        $connector = $this->resolveInMemoryConnector();
+        $this->pdo = $connector->getPDO();
+        $this->runBeforeClassSql();
     }
     
-        private function createNewInMemoryConnector(){
-            return $this->temporaryNewPdo = self::$connectorsPool->getInMemoryConnector(true);
-        }
-        
-        private function getConnectionFromPool(){
-            if(self::$objId && self::$testCaseConnectionEnabled){
-                $id = self::$objId;
+        private function resolveInMemoryConnector(){
+            if(self::$testCaseConnectionEnabled && !self::$objId){
+                $connector = $this->createNewInMemoryConnectorForTestCaseScope();
             }
             else{
-                $id = NULL;
+                $connector = $this->getConnectionFromPool();
             }
-            return self::$connectorsPool->getInMemoryConnector($id);
+            return $connector;
         }
     
-    protected function initializeSql($sql){
-        static $initialized = false;
-        if(!$initialized){
-            $this->runSqlWithBatchRunner($sql);
-            $initialized = true;
+            private function createNewInMemoryConnectorForTestCaseScope(){
+                return $this->testCaseScopeConnector = self::$connectorsPool->getInMemoryConnector(true);
+            }
+
+            private function getConnectionFromPool(){
+                if(self::$objId && self::$testCaseConnectionEnabled){
+                    $id = self::$objId;
+                }
+                else{
+                    $id = NULL;
+                }
+                return self::$connectorsPool->getInMemoryConnector($id);
+            }
+        
+        private function runBeforeClassSql(){
+            if(self::$beforeClassSql){
+                self::$sqlRunner->run($this->pdo, self::$beforeClassSql);
+                self::$beforeClassSql = false;
+            }
         }
-    }
-    
-    protected function deinitializeSql($sql){
-        self::$afterClassSql = $sql;
-    }
     
     public static function afterClassSql($sql){
         self::$afterClassSql = $sql;
@@ -138,16 +129,7 @@ abstract class AbstractDbUnitTestCase extends \PHPUnit_Extensions_Database_TestC
                     foreach($exs as $pdoException){
                         $desctiption .= $pdoException->getMessage()."\n";
                     }
-                $message = "When running provided SQL statments following PDOExceptions were caught:\n\n";
-                return $message.$desctiption;
-            }
-
-    public function makeInMemoryConnector() {
-        $connector = self::$connectorsPool->getInMemoryConnector();
-        $this->fillPdo($connector->getPDO());
-    }
-    
-        private function fillPdo($pdo){
-            $this->pdo = $pdo;
-        }
+                    $message = "When running provided SQL statments following PDOExceptions were caught:\n\n";
+                    return $message.$desctiption;
+                }
 }

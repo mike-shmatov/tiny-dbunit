@@ -18,4 +18,13 @@ class ScopingTestCaseTest extends \Tiny\DbUnit\AbstractDbUnitTestCase
         $results = $this->pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE '%sqlite%';", \PDO::FETCH_ASSOC);
         $this->assertCount(0, $results->fetchAll());
     }
+    
+    public function testCreateTable(){
+        $this->runSql('CREATE TABLE tbl (field TEXT);');
+    }
+    
+    public function testSameConnection(){
+        $results = $this->pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE '%sqlite%';", \PDO::FETCH_ASSOC);
+        $this->assertCount(1, $results->fetchAll());
+    }
 }

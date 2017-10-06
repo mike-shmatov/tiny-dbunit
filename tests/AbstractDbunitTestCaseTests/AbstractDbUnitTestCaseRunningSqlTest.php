@@ -4,23 +4,20 @@
  */
 class AbstractDbUnitTestCaseRunningSqlTest extends \Tiny\DbUnit\AbstractDbUnitTestCase
 {
+    public static function setUpBeforeClass() {
+        self::beforeClassSql('CREATE TABLE tbl (id INTEGER PRIMARY KEY AUTOINCREMENT);CREATE TABLE tbl2 (value TEXT);');
+        parent::setUpBeforeClass();
+    }
     /**
      * That is how real setUp should look like.
      * Preparing a connection should go first so parent setUp can be run with connection
      * otherwise it will fail.
-     * initializeSql() will be run only once
      * runSql() will be run on each setUp()
      */
     public function setUp(){
         $this->useInMemoryConnector();
-        $this->initializeSql('CREATE TABLE tbl (id INTEGER PRIMARY KEY AUTOINCREMENT);CREATE TABLE tbl2 (value TEXT);');
         $this->runSql('INSERT INTO tbl2 (value) VALUES ("one");');
         parent::setUp();
-    }
-    
-    public function tearDown(){
-        $this->deinitializeSql('DELETE FROM tbl2;');
-        parent::tearDown();
     }
     
     /**
@@ -28,10 +25,6 @@ class AbstractDbUnitTestCaseRunningSqlTest extends \Tiny\DbUnit\AbstractDbUnitTe
      */
     protected function getDataSet() {
         return new \PHPUnit_Extensions_Database_DataSet_ArrayDataSet([]);
-    }
-    
-    public function testPdo(){
-        $this->assertInstanceOf(\PDO::class, $this->pdo);
     }
     
     public function testDbInitializedWithTbl(){
@@ -45,17 +38,9 @@ class AbstractDbUnitTestCaseRunningSqlTest extends \Tiny\DbUnit\AbstractDbUnitTe
     }
     
     public function testSetupOnTbl2() {
-        $results = $this->pdo->query('SELECT * FROM tbl2;');
+        $results = $this->pdo->query('SELECT * FROM tbl2;', \PDO::FETCH_ASSOC);
         $rows = $results->fetchAll();
         $this->assertArraySubset(['value' => 'one'], $rows[0]);
-        $this->assertCount(4, $rows); // note 4 lines since setUpSql was run 4 times including this test
-    }
-    
-    public function testtearDownAfterClass() {
-        $data = $this->pdo->query('SELECT * FROM tbl2;', \PDO::FETCH_ASSOC)->fetchAll();
-        $this->assertCount(5, $data);
-        parent::tearDownAfterClass(); // explicit call for deinitialization
-        $data = $this->pdo->query('SELECT * FROM tbl2;', \PDO::FETCH_ASSOC)->fetchAll();
-        $this->assertCount(0, $data);
+        $this->assertCount(3, $rows); // note 3 rows since setUpSql was run 3 times including this test
     }
 }

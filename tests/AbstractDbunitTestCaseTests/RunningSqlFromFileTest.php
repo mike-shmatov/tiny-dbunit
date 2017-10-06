@@ -1,9 +1,13 @@
 <?php
-class TestCaseRunningSqlFromFileTest extends \Tiny\DbUnit\AbstractDbUnitTestCase
+class RunningSqlFromFileTest extends \Tiny\DbUnit\AbstractDbUnitTestCase
 {
+    public static function setUpBeforeClass() {
+        self::beforeClassSql(realpath(__DIR__.'/SqlFiles/SampleTable.sqlite.sql'));
+        parent::setUpBeforeClass();
+    }
     public function setUp(){
         $this->useInMemoryConnector();
-        $this->initializeSql(realpath(__DIR__.'/SqlFiles/SampleTable.sqlite.sql'));
+        parent::setUp();
     }
     
     protected function getDataSet() {

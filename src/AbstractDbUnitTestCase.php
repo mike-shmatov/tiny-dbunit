@@ -15,8 +15,8 @@ abstract class AbstractDbUnitTestCase extends \PHPUnit_Extensions_Database_TestC
     
     public function __construct($name = null, array $data = array(), $dataName = '', $child = NULL) {
         parent::__construct($name, $data, $dataName);
-        self::$connectorsPool = ConnectorsPoolSingletonDecorator::getInstance();
-        self::$sqlRunner = SqlRunnerSingletonDecorator::getInstance();
+        self::$connectorsPool = ConnectionManagement\ConnectorsPoolSingletonDecorator::getInstance();
+        self::$sqlRunner = SqlRunners\SqlRunnerSingletonDecorator::getInstance();
     }
     
     public static function setUpBeforeClass() {

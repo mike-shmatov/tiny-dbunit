@@ -1,5 +1,5 @@
 <?php
-namespace Tiny\DbUnit;
+namespace Tiny\DbUnit\SqlRunners;
 
 abstract class SqlBatchRunner
 {

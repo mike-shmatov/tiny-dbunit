@@ -10,7 +10,7 @@ class SqlBatcherSelfCollectingTest extends PHPUnit_Framework_TestCase
         $this->strategyMock = $this->getMockBuilder('Tiny\\Sql\\Interfaces\\ExceptionsHandlingStrategy')
                          ->setMethods(['handle', 'getCollected'])
                          ->getMock();
-        $this->batchRunner = new Tiny\DbUnit\SqlBatchSelfCollectingRunner($this->strategyMock, $this->pdoMock);
+        $this->batchRunner = new Tiny\DbUnit\SqlRunners\SqlBatchSelfCollectingRunner($this->strategyMock, $this->pdoMock);
     }
     
     public function testCollecting(){

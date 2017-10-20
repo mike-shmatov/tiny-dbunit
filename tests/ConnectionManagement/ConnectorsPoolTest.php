@@ -5,8 +5,8 @@ class ConnectorsPoolTest extends \PHPUnit_Framework_TestCase
     private $factoryMock;
     
     public function setUp(){
-        $this->factoryMock = $this->createMock(\Tiny\DbUnit\DbConnectorsFactory::class);
-        $this->pool = new Tiny\DbUnit\ConnectorsPool($this->factoryMock);
+        $this->factoryMock = $this->createMock(\Tiny\DbUnit\ConnectionManagement\DbConnectorsFactory::class);
+        $this->pool = new Tiny\DbUnit\ConnectionManagement\ConnectorsPool($this->factoryMock);
     }
     
     public function testCreating(){

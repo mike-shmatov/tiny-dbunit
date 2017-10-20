@@ -7,7 +7,7 @@ class SqlBatchRunnerTest extends PHPUnit_Framework_TestCase
     
     public function setUp(){
         $this->pdoMock = $this->createMock(\PDO::class);
-        $this->batchRunner = $this->getMockBuilder(Tiny\DbUnit\SqlBatchRunner::class)
+        $this->batchRunner = $this->getMockBuilder(Tiny\DbUnit\SqlRunners\SqlBatchRunner::class)
                                   ->setConstructorArgs([$this->pdoMock])
                                   ->getMockForAbstractClass();
     }
@@ -15,7 +15,7 @@ class SqlBatchRunnerTest extends PHPUnit_Framework_TestCase
     public function testCreatingWithoutPdo(){
         $caught = NULL;
         try{
-            $batchRunner = $this->batchRunner = $this->getMockBuilder(Tiny\DbUnit\SqlBatchRunner::class)
+            $batchRunner = $this->batchRunner = $this->getMockBuilder(Tiny\DbUnit\SqlRunners\SqlBatchRunner::class)
                                   ->setConstructorArgs([])
                                   ->getMockForAbstractClass();
         } catch (\Exception $ex) {

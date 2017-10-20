@@ -4,7 +4,7 @@ class PdoExceptionsCollectingHandlerTest extends PHPUnit_Framework_TestCase
     private $handler;
     
     public function setUp() {
-        $this->handler = new \Tiny\DbUnit\PdoExceptionsCollectingHandler();
+        $this->handler = new \Tiny\DbUnit\SqlRunners\PdoExceptionsCollectingHandler();
     }
     
     public function testGeneralExceptionIsRethrown(){

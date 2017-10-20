@@ -2,7 +2,7 @@
 /**
  * Self-testing approach: current TestCase extends the TestCase being tested.
  */
-class AbstractDbUnitTestCaseTest extends \Tiny\DbUnit\AbstractDbUnitTestCase
+class ConnectionAvailabilityTest extends \Tiny\DbUnit\AbstractDbUnitTestCase
 {
     /**
      * That is how real setUp should look like.
@@ -21,11 +21,17 @@ class AbstractDbUnitTestCaseTest extends \Tiny\DbUnit\AbstractDbUnitTestCase
         return new \PHPUnit_Extensions_Database_DataSet_ArrayDataSet([]);
     }
     
+    public function testConnectionIsGlobal(){
+        $results = $this->pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE '%sqlite%';", \PDO::FETCH_ASSOC);
+        $tables = array_column($results->fetchAll(), 'name');
+        $this->assertContains('global', $tables);
+    }
+    
     public function testHavingPdo(){
         $this->assertInstanceOf(\PDO::class, $this->pdo);
     }
     
-    public function testGetConnection(){
+    public function testGetPHPUnitConnection(){
         $this->assertInstanceOf(\PHPUnit_Extensions_Database_DB_IDatabaseConnection::class, $this->getConnection());
     }
     

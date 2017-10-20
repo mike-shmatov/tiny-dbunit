@@ -1,5 +1,5 @@
 <?php
-namespace Tiny\DbUnit;
+namespace Tiny\DbUnit\ConnectionManagement;
 
 class ConnectorsPoolSingletonDecorator extends ConnectorsPool
 {
@@ -7,7 +7,7 @@ class ConnectorsPoolSingletonDecorator extends ConnectorsPool
     
     public static function getInstance(){
         if(!isset(self::$me)){
-            self::$me = new static (new \Tiny\DbUnit\DbConnectorsFactory());
+            self::$me = new static (new \Tiny\DbUnit\ConnectionManagement\DbConnectorsFactory());
         }
         return self::$me;
     }

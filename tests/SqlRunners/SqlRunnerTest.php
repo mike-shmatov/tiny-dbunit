@@ -10,8 +10,8 @@ class SqlRunnerTest extends PHPUnit_Framework_TestCase
     public function setUp(){
         $this->configureFilesystemMocking();
         $this->parserMock = $this->createMock(\Tiny\Sql\Parsers\StatementsSplitter::class);
-        $this->batcherMock = $this->createMock(\Tiny\DbUnit\SqlBatchRunner::class);
-        $this->runner = new \Tiny\DbUnit\SqlRunner($this->parserMock, $this->batcherMock);
+        $this->batcherMock = $this->createMock(\Tiny\DbUnit\SqlRunners\SqlBatchRunner::class);
+        $this->runner = new \Tiny\DbUnit\SqlRunners\SqlRunner($this->parserMock, $this->batcherMock);
         $this->pdoStub = $this->createMock(\PDO::class);
     }
     

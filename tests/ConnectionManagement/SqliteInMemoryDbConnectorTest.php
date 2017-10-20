@@ -4,7 +4,7 @@ class SqliteInMemoryDbConnectorTest extends PHPUnit_Framework_TestCase
     private $connector;
     
     public function setUp(){
-        $this->connector = new Tiny\DbUnit\SqliteInMemoryDbConnector();
+        $this->connector = new Tiny\DbUnit\ConnectionManagement\SqliteInMemoryDbConnector();
     }
     
     public function testPDOcreated(){

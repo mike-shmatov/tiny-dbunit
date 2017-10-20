@@ -33,6 +33,6 @@ class PdoExceptionsOnInvalidSqlTest extends \Tiny\DbUnit\AbstractDbUnitTestCase
     }
     
     public function testExceptionContainsRelevantInfo(){
-        $this->assertRegExp('/.*"THIS".*"AND".*/s', $this->expectedException->getMessage());
+        $this->assertRegExp('/.*near "THIS":.*near "AND":.*/s', $this->expectedException->getMessage());
     }
 }

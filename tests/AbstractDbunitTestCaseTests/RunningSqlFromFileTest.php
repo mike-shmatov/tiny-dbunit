@@ -2,13 +2,22 @@
 class RunningSqlFromFileTest extends \Tiny\DbUnit\AbstractDbUnitTestCase
 {
     public static function setUpBeforeClass() {
-        self::beforeClassSql(realpath(__DIR__.'/SqlFiles/SampleTable.sqlite.sql'));
+        self::configureFilesystemMocking();
+        self::beforeClassSql(org\bovigo\vfs\vfsStream::url('root/statements.sql'));
         parent::setUpBeforeClass();
     }
+    
     public function setUp(){
         $this->useInMemoryConnector();
         parent::setUp();
     }
+    
+        private static function configureFilesystemMocking(){
+            $rootDir = org\bovigo\vfs\vfsStream::setup('root');
+            \org\bovigo\vfs\vfsStream::newFile('statements.sql')
+                ->at($rootDir)
+                ->setContent('CREATE TABLE sample (field TEXT);');
+        }
     
     protected function getDataSet() {
         return new PHPUnit_Extensions_Database_DataSet_ArrayDataSet([]);

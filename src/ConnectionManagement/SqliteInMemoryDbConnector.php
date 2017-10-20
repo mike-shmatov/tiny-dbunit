@@ -1,7 +1,7 @@
 <?php
-namespace Tiny\DbUnit;
+namespace Tiny\DbUnit\ConnectionManagement;
 
-class SqliteInMemoryDbConnector implements Interfaces\DbConnector
+class SqliteInMemoryDbConnector implements \Tiny\DbUnit\Interfaces\DbConnector
 {
     private $pdo;
     

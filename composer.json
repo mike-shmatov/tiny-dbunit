@@ -1,6 +1,8 @@
 {
     "name": "tiny/dbunit",
-    "description": "Helper package for database testing",
+    "description": "Enhances database testing with SQLite in-memory engine.",
+    "keywords": ["PHPUnit", "unit testing", "databases", "SQLite", "in-memory"],
+    "license": "MIT",
     "authors": [
         {
             "name": "Mike Shmatov",
@@ -10,12 +12,6 @@
     "autoload": {
         "psr-4": {"Tiny\\DbUnit\\": "src/"}
     },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "..//sql"
-        }
-    ],
     "require": {
         "tiny/sql": "dev-master"
     },

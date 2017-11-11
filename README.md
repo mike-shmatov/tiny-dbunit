@@ -170,7 +170,17 @@ $this->runSql($sql); // SQL as string or filepath to .sql
 ```
 Used in `setUp()`, `tearDown()`, or even any test method to run SQL.
 
-Currently only absolute filepaths to SQL files are supported.
+`$sql` arguments given as filepaths can be provided as absolute or relative (to test case) paths to SQL files.
+Besides, they can be provided as lists or arrays or a combination. So all examples below are valid:
+
+```php
+$this->runSql('../sample-table-schema.sql', './another-table-schema.sql');
+$this->runSql(['../sample-table-schema.sql', './another-table-schema.sql']);
+$this->runSql('../sample-table-schema.sql', [
+    'CREATE TABLE table1 (id INTEGER);',
+    './another-table-schema.sql'
+]);
+```
 
 ### Special objects
 

@@ -12,15 +12,19 @@ abstract class AbstractDbUnitTestCase extends \PHPUnit_Extensions_Database_TestC
     private static $testCaseConnectionEnabled = false;
     private $testCaseScopeConnector;
     private static $beforeClassSql;
+    private $filePathToTestCase;
+    private static $filePathToTestCaseCache;
     
     public function __construct($name = null, array $data = array(), $dataName = '', $child = NULL) {
         parent::__construct($name, $data, $dataName);
         self::$connectorsPool = ConnectionManagement\ConnectorsPoolSingletonDecorator::getInstance();
         self::$sqlRunner = SqlRunners\SqlRunnerSingletonDecorator::getInstance();
+        $this->createFilePathToTestCase();
     }
     
     public static function setUpBeforeClass() {
         self::$objId = NULL;
+        self::$filePathToTestCaseCache = NULL;
         parent::setUpBeforeClass();
     }
     
@@ -28,8 +32,8 @@ abstract class AbstractDbUnitTestCase extends \PHPUnit_Extensions_Database_TestC
         self::$testCaseConnectionEnabled = true;
     }
     
-    protected static function beforeClassSql($sql){
-        self::$beforeClassSql = $sql;
+    protected static function beforeClassSql(...$sqls){
+        self::$beforeClassSql = $sqls;
     }
     
     public function setUp(){
@@ -38,8 +42,14 @@ abstract class AbstractDbUnitTestCase extends \PHPUnit_Extensions_Database_TestC
             $this->storeTestCaseScopeConnectorInPool();
         }
         self::$pdoCache = $this->pdo;
+        self::$filePathToTestCaseCache = $this->filePathToTestCase;
         parent::setUp();
     }
+    
+        private function createFilePathToTestCase(){
+            $reflection = new \ReflectionClass($this);
+            $this->filePathToTestCase = \dirname($reflection->getFileName());
+        }
     
         private function createTestCaseId(){
             if(is_null(self::$objId)){
@@ -89,28 +99,76 @@ abstract class AbstractDbUnitTestCase extends \PHPUnit_Extensions_Database_TestC
         
         private function runBeforeClassSql(){
             if(self::$beforeClassSql){
-                self::$sqlRunner->run($this->pdo, self::$beforeClassSql);
+                $this->runSql(self::$beforeClassSql);
                 self::$beforeClassSql = false;
             }
         }
     
-    public static function afterClassSql($sql){
-        self::$afterClassSql = $sql;
+    public static function afterClassSql(...$sqls){
+        self::$afterClassSql = $sqls;
     }
     
     public static function tearDownAfterClass() {
         self::$objId = NULL;
         self::$testCaseConnectionEnabled = false;
         if(self::$afterClassSql){
-            self::$sqlRunner->run(self::$pdoCache, self::$afterClassSql);
+            $sqls = self::normalizeSqls(self::$afterClassSql);
+            foreach($sqls as $sql){
+                $sql = self::normalizeSql($sql, self::$filePathToTestCaseCache);
+                self::$sqlRunner->run(self::$pdoCache, $sql);
+            }
             self::$afterClassSql = false;
         }
+        self::$filePathToTestCaseCache = NULL; // coverage?
         parent::tearDownAfterClass();
+        /* seems to be untestable. have to clear it out in case it was defined 
+         * in a test case without tests -- and if so it will persist to next 
+         * test because it will not be ever run in useInMemoryConnector()
+         * also think it's better to duplicate it in case anybody overriding
+         * this method and forgotting to call it as parent::tearDownAfterClass()
+         */
+        self::$beforeClassSql = ''; // 
     }
 
-    protected function runSql($sql){
-        $this->runSqlWithBatchRunner($sql);
+    protected function runSql(...$sqls){
+        $sqls = self::normalizeSqls($sqls);
+        foreach($sqls as $sql){
+            $this->runSqlEntry($sql);
+        }
     }
+    
+        private static function normalizeSqls(array $sqls){
+            $normalized = [];
+            foreach($sqls as $sqlEntry){
+                if(is_string($sqlEntry)){
+                    $normalized[] = $sqlEntry;
+                }
+                elseif(is_array($sqlEntry)){
+                    $normalized = self::normalizeSqls($sqlEntry);
+                }
+            }
+            return $normalized;
+        }
+    
+        private function runSqlEntry($sql){
+            $sql = $this->normalizeSql($sql, $this->filePathToTestCase);
+            $this->runSqlWithBatchRunner($sql);
+        }
+    
+        private static function normalizeSql($sql, $relativelyTo){
+            if(!file_exists($sql)){
+                $sql = self::tryAsRelativePath($sql, $relativelyTo);
+            }
+            return $sql;
+        }
+        
+            private static function tryAsRelativePath($sql, $relativelyTo){
+                $relativeResolved = $relativelyTo.'/'.$sql;
+                if(file_exists($relativeResolved)){
+                    $sql = \realpath($relativeResolved);
+                }
+                return $sql;
+            }
     
         private function runSqlWithBatchRunner($sql){
             self::$sqlRunner->run($this->pdo, $sql);

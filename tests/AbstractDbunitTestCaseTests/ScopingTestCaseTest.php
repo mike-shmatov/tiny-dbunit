@@ -3,6 +3,7 @@ class ScopingTestCaseTest extends \Tiny\DbUnit\AbstractDbUnitTestCase
 {
     public static function setUpBeforeClass() {
         self::createTestCaseConnection();
+        parent::setUpBeforeClass();
     }
     
     public function setUp() {
